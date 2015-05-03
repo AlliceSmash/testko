@@ -1,0 +1,117 @@
+﻿@model TestKo.Models.SelectOptionModel
+
+@{
+    ViewBag.Title = "Select Option";
+}
+@section Scripts{
+    @Scripts.Render("~/Scripts/knockout-3.1.0.js")
+    @Scripts.Render("~/Scripts/knockout.mapping-latest.js")
+    @Scripts.Render("~/Scripts/moment.min.js")
+    @Scripts.Render("~/Scripts/selectOptionView.js")
+
+    <script type="text/javascript">
+        //   debugger;
+        subViewModel = ko.mapping.fromJS(@Html.Raw(Json.Encode(Model)));
+    </script>
+
+    <script type="text/html" id="guestTemplate">
+        <tr>
+            <td>
+                <input class="input-medium" data-bind='value: Street, attr:{name: "MoreGuests[" + $index() +"].Street"}' placeholder="Address Line1" />
+            </td>
+            <td>
+                @Html.EnumDropDownListFor(model => model.State,
+                        new { data_bind = "value: State, attr:{name: 'MoreGuests[' + $index() +'].State',id: 'MoreGuests[' + $index() +'].State'}" })
+            </td>
+            <td>
+                <input class="input-medium" data-bind='value: City, attr:{name: "MoreGuests[" + $index() +"].City"}' placeholder="City" />
+            </td>
+            <td>
+            <input class="input-medium" data-bind='value: Zip , attr:{name: "MoreGuests[" + $index() +"].Zip"}' placeholder="Zip Code" />
+            <a class="btn btn-small btn-danger" data-bind="click: $parent.removeGuest">X</a>
+            </td>
+        </tr>
+    </script>
+}
+
+<h2>Select Various Options </h2>
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "thisForm" }))
+{
+    <nav>
+        <button type="submit" class="button" id="SaveBtn">Save</button>
+    </nav>
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
+
+    <div>
+        <h4>Basic Information</h4>
+        @*<div>
+            @Html.LabelFor(model => model.Eligible)
+            @Html.CheckBoxFor(model => model.Eligible, new { data_bind = "checked: completeVM.Eligible " })
+        </div>*@
+        <div>
+            @Html.LabelFor(model => model.Eligible)
+            @Html.RadioButtonFor(model => model.Eligible,"true", new { id="yes", data_bind = "checked: completeVM.EligibleRadioHelper " })
+            @Html.Label("yes", "YES")
+            @Html.RadioButtonFor(model => model.Eligible, "false", new {id="no", data_bind = "checked: completeVM.EligibleRadioHelper " })
+            @Html.Label("no", "No")
+        </div>
+        <div>
+            @Html.LabelFor(model => model.Date)
+            @Html.TextBoxFor(model => model.Date, new { data_bind = "date: completeVM.Date, format: 'MM/DD/YYYY'" })
+        </div>
+        <div>
+            @Html.LabelFor(model => model.Name)
+            @Html.TextBoxFor(model => model.Name, new { data_bind = "value: completeVM.Name, valueUpdate; 'blur'" })
+        </div>
+        <div>
+            @Html.LabelFor(model => model.State)
+            @Html.EnumDropDownListFor(model => model.State, new { data_bind = "value: completeVM.State" })
+        </div>
+        <h4>Addtional Guests</h4>
+
+        <div data-bind="with: completeVM">
+            <table data-bind="visible: MoreGuests().length > 0">
+                <thead>
+                    <tr>
+                        <th>Street</th>
+                        <th>State</th>
+                        <th>City</th>
+                        <th>Zip</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody data-bind="template: {name:'guestTemplate', foreach: MoreGuests}"></tbody>
+            </table>
+        </div>
+        <button id="AddMoreGuest" class="btn btn-small" data-bind="click: completeVM.addGuest">Add New Guest</button>
+
+    </div>
+    <div>
+        @Html.LabelFor(model => model.AvailableOptions)
+        @Html.EnumDropDownListFor(model => model.SelectedOption,
+                new { data_bind = "value: completeVM.SelectedOption" }
+        )
+        <div data-bind="visible: secondOptionSelected()">
+            @Html.LabelFor(model => model.Book)
+            @Html.TextBoxFor(model => model.Book.Name)
+            @Html.LabelFor(model => model.Book.UnitPrice)
+            @Html.TextBoxFor(model => model.Book.UnitPrice)
+            @Html.LabelFor(model => model.Book.Category)
+            @Html.EnumDropDownListFor(model => model.Book.Category)
+        </div>
+
+        <div data-bind="visible: thirdOptionSelected()">
+            @Html.LabelFor(model => model.Food)
+            @Html.TextBoxFor(model => model.Food.FoodName, new { data_bind = "value: foodVM.Name" })
+            @Html.LabelFor(model => model.Food.FoodWeight)
+            @Html.TextBoxFor(model => model.Food.FoodWeight)
+            @Html.LabelFor(model => model.Food.Category)
+            @Html.EnumDropDownListFor(model => model.Food.Category)
+        </div>
+    </div>
+    @*<div>
+        DEBUG
+        <div data-bind="text: ko.mapping.toJSON(completeVM)"></div>
+    </div>*@
+}
